@@ -2,7 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Pencil, LucideArrowDown } from "lucide-react";
+import {
+  Pencil,
+  LucideArrowDown,
+  Plus,
+  LucideSlidersHorizontal,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +20,7 @@ import { Input } from "@/components/ui/input";
 
 import { Icons } from "@/components/ui/icons";
 import FundTable from "./fund-table";
+import FilterForm from "./filter-dialog";
 
 const fundData = {
   topChanges24h: [
@@ -184,11 +190,11 @@ const fundsTableData = {
 };
 export default function Overview() {
   const navigate = useNavigate();
-  const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
-  const [tiktokUsername, setTiktokUsername] = useState("");
+
   const [fundsView, setFundsView] = useState<"featured" | "all" | "bookmarked">(
     "featured"
   );
+  const [openFilterDrawer, setOpenFilterDrawer] = useState(false);
   return (
     <>
       <div className="p-2 md:p-6 max-w-7xl mx-auto space-y-6">
@@ -208,20 +214,26 @@ export default function Overview() {
               {fundData.topChanges24h.map((fund, index) => (
                 <div
                   key={index}
-                  onClick={() => navigate(`/details${fund.name}`)}
-                  className="flex justify-between items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
+                  onClick={() => navigate(`/details/${fund.name}`)}
+                  className="flex gap-4 items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
                 >
-                  <div className="font-medium flex items-center gap-2">
-                    <Icons
-                      tokenPic1={fund.tokenPic1}
-                      tokenPic2={fund.tokenPics2}
-                    />
+                  <Icons
+                    tokenPic1={fund.tokenPic1}
+                    tokenPic2={fund.tokenPics2}
+                  />
+                  <div className="font-medium flex-col md:flex-row items-center gap-2">
                     <p>{fund.name}</p>
-                  </div>
-                  <p className="text-opacity-60 text-right">{fund.value}</p>
-                  <div className="flex items-center gap-1 text-green-500">
-                    <p className="">{fund.change}</p>
-                    <LucideArrowDown />
+                    <div className="flex w-full justify-between items-center gap-5 text-sm">
+                      <p className="text-opacity-60 text-right">{fund.value}</p>
+                      <div className="flex items-center gap-1 text-green-500">
+                        <p className="">{fund.change}</p>
+                        {fund.change > 0 ? (
+                          <LucideArrowDown className="rotate-180" />
+                        ) : (
+                          <LucideArrowDown />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -258,7 +270,7 @@ export default function Overview() {
               {fundData.topOutflow7d.map((fund, index) => (
                 <div
                   key={index}
-                  onClick={() => navigate(`/details${fund.name}`)}
+                  onClick={() => navigate(`/details/${fund.name}`)}
                   className="flex justify-between items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
                 >
                   <div className="font-medium flex items-center gap-2">
@@ -279,8 +291,8 @@ export default function Overview() {
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
               <Card>
-                <CardHeader className="flex flex-col lg:flex-row items-center justify-between">
-                  <div className="flex gap-1 items-center *:rounded-none">
+                <CardHeader className="flex flex-col lg:flex-row md:items-center justify-between">
+                  <div className="flex gap-1 items-center *:rounded-none w-full overflow-x-auto">
                     <Button
                       variant="ghost"
                       onClick={() => setFundsView("featured")}
@@ -301,12 +313,10 @@ export default function Overview() {
                     >
                       All Funds
                     </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       onClick={() => setFundsView("bookmarked")}
-                      className={`${
+                      className={` md:hidden ${
                         fundsView === "bookmarked"
                           ? "border-b border-primary rounded-b-none"
                           : ""
@@ -314,9 +324,36 @@ export default function Overview() {
                     >
                       Bookmarks
                     </Button>
-                    <Button onClick={() => navigate("/create-fund")}>
-                      <Pencil className="w-4 h-4 mr-2" />
-                      Create a New Fund
+                  </div>
+                  <div className="flex items-start md:items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setFundsView("bookmarked")}
+                      className={`hidden md:inline-block ${
+                        fundsView === "bookmarked"
+                          ? "border-b border-primary rounded-b-none"
+                          : ""
+                      }`}
+                    >
+                      Bookmarks
+                    </Button>
+                    <Button
+                      onClick={() => navigate("/create-fund")}
+                      className="rounded-full"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span className="hidden md:inline-block">
+                        Create a New Fund
+                      </span>
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setOpenFilterDrawer(true);
+                      }}
+                      className="md:hidden"
+                      variant="outline"
+                    >
+                      <LucideSlidersHorizontal className="w-4 h-4" />
                     </Button>
                   </div>
                 </CardHeader>
@@ -327,29 +364,13 @@ export default function Overview() {
             </div>
           </TabsContent>
         </Tabs>
+        {openFilterDrawer && (
+          <FilterForm
+            open={openFilterDrawer}
+            openChange={setOpenFilterDrawer}
+          />
+        )}
       </div>
-
-      <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Connect TikTok Account</DialogTitle>
-            <DialogDescription>
-              Enter your TikTok username to connect your account and view
-              analytics
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Input
-                id="tiktok-username"
-                placeholder="@username"
-                value={tiktokUsername}
-                onChange={(e) => setTiktokUsername(e.target.value)}
-              />
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

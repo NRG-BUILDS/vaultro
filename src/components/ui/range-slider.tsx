@@ -197,7 +197,7 @@ export default function RangeSlider({
                 onChange={handleFromChange}
                 disabled={disabled}
                 className={`
-                border rounded-md p-2 text-s
+                border rounded-md p-2 text-sm bg-transparent
                 focus:outline-none focus:border-${primaryColor}-500
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
@@ -211,7 +211,7 @@ export default function RangeSlider({
                 onChange={handleToChange}
                 disabled={disabled}
                 className={`
-                border rounded-md p-2 text-s
+                border rounded-md p-2 text-sm bg-transparent
                 focus:outline-none focus:border-${primaryColor}-500
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
