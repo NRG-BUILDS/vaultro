@@ -19,6 +19,14 @@ const navItems: NavItem[] = [
   { label: "My Positions", href: "/positions" },
 ];
 
+const defaultAppearance = {
+  theme: window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light",
+  animations: true,
+  compactMode: false,
+};
+
 export function Navbar({
   setShowWalletPopup,
 }: {
@@ -28,7 +36,7 @@ export function Navbar({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [appearance, setAppearance] = useState(() => {
     const savedAppearance = localStorage.getItem("appearance");
-    return savedAppearance ? JSON.parse(savedAppearance) : undefined;
+    return savedAppearance ? JSON.parse(savedAppearance) : defaultAppearance;
   });
   const isDarkMode = appearance.theme === "dark";
   const location = useLocation();
