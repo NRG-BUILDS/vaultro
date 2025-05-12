@@ -26,26 +26,16 @@ import {
 import { Icons } from "@/components/ui/icons";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { TokenDetails } from "../overview/fund-table";
 
 interface Props {
-  funds: {
-    id: number;
-    name: string;
-    icons: string[];
-    featured: boolean;
-    price: number;
-    priceChange: number;
-    totalLocked: number;
-    inflow7d: number;
-    outflow7d: number;
-    fundFee: number;
-  }[];
+  funds: TokenDetails[];
 }
 
 export default function InteractionsTable({ funds }: Props) {
   const [search, setSearch] = useState("");
   const filteredFunds = funds.filter((fund) =>
-    fund.name.toLowerCase().includes(search.toLowerCase())
+    fund.title?.toLowerCase().includes(search.toLowerCase())
   );
   // Format numbers with commas for thousands
   const formatNumber = (num) => {
@@ -74,9 +64,9 @@ export default function InteractionsTable({ funds }: Props) {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead className="text-right">Price (ADA)</TableHead>
+            <TableHead className="text-right">Price (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
-            <TableHead className="text-right">Total locked (ADA)</TableHead>
+            <TableHead className="text-right">Total locked (XRP)</TableHead>
             <TableHead className="text-right">Inflow 7d</TableHead>
             <TableHead className="text-right">Outflow 7d</TableHead>
             <TableHead className="text-right">Fund Fee</TableHead>
@@ -88,47 +78,52 @@ export default function InteractionsTable({ funds }: Props) {
             <TableRow key={fund.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Icons tokenPic1={fund.icons[0]} tokenPic2={fund.icons[1]} />
+                  {/* <Icons tokenPic1={fund.icons[0]} tokenPic2={fund.icons[1]} /> */}
+                  <div className="rounded-full size-9 bg-muted border border-white overflow-hidden">
+                    <img
+                      src={fund.gravatar}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  </div>
                   <div className="flex flex-col">
-                    <span>{fund.name}</span>
-                    {fund.featured && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs bg-primary/10 text-primary px-2 py-0.5 w-fit"
-                      >
-                        Featured
-                      </Badge>
-                    )}
+                    <span>{fund.title}</span>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-primary/10 text-primary px-2 py-0.5 w-fit"
+                    >
+                      Featured
+                    </Badge>
                   </div>
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {fund.price.toFixed(3)}
+                {fund.xrp_price.toFixed(3)}
               </TableCell>
               <TableCell className="text-right">
                 <div
                   className={`flex items-center justify-end ${
-                    fund.priceChange >= 0 ? "text-green-500" : "text-red-500"
+                    fund.price_change >= 0 ? "text-green-500" : "text-red-500"
                   }`}
                 >
-                  {fund.priceChange >= 0 ? (
+                  {fund.price_change >= 0 ? (
                     <ArrowUpRight className="h-4 w-4 mr-1" />
                   ) : (
                     <ArrowDownRight className="h-4 w-4 mr-1" />
                   )}
-                  {Math.abs(fund.priceChange).toFixed(2)}%
+                  {Math.abs(fund.price_change).toFixed(2)}%
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.totalLocked)}
+                {formatNumber(fund.liquidity)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.inflow7d)}
+                {formatNumber(fund.price_change_7d)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.outflow7d)}
+                {formatNumber("---")}
               </TableCell>
-              <TableCell className="text-right">{fund.fundFee}%</TableCell>
+              <TableCell className="text-right">{"---"}%</TableCell>
               <TableCell className="text-right">
                 <Button
                   size="sm"

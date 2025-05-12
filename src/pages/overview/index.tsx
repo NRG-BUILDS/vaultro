@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
-  Pencil,
   LucideArrowDown,
   Plus,
   LucideSlidersHorizontal,
+  LucideLoader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,53 @@ import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/ui/icons";
 import FundTable from "./fund-table";
 import FilterForm from "./filter-dialog";
+import useRequest from "@/hooks/use-request";
 
+interface TradingPair {
+  id: number;
+  issuer: string;
+  symbol: string;
+  title: string;
+  currencyId1: number | null;
+  currencyId2: number | null;
+  txns: number;
+  price1: string;
+  price2: string;
+  volume_usd: string;
+  liquidity: string;
+  liquidity_usd: string;
+  tradingFee: string;
+  created_at: string;
+  swaps: number;
+  holders: number;
+  amount1: string;
+  amount2: string;
+  level: string;
+  apr: string;
+  lp_amount: string;
+  fails: number;
+  isFiat: number;
+  farmingApr: string | null;
+  logos: string[];
+  price1Usd: number;
+  price2Usd: number;
+  plus2Depth: number;
+  minus2Depth: number;
+}
+interface MemeToken {
+  id: number;
+  logo: string;
+  title: string;
+  tier: string;
+  created_at: string;
+  ticker: string;
+  address: string;
+  twitter: string | null;
+  price: string;
+  liquidity: string;
+  priceChange: number;
+  holders: number;
+}
 const fundData = {
   topChanges24h: [
     {
@@ -105,96 +151,31 @@ const fundData = {
     },
   ],
 };
-const fundsTableData = {
-  featured: [
-    {
-      id: 1,
-      name: "Market Cap Top 3",
-      featured: true,
-      price: 4.464,
-      priceChange: 3.19,
-      totalLocked: 25892342,
-      inflow: 342,
-      outflow: 3523,
-      fundFee: 0,
-      bookmarked: true,
-      icons: ["BTC", "ETH", "BNB"],
-    },
-    {
-      id: 2,
-      name: "Market Cap Top 5",
-      featured: true,
-      price: 6.199,
-      priceChange: 2.81,
-      totalLocked: 11223240,
-      inflow: 2432,
-      outflow: 232,
-      fundFee: 0,
-      bookmarked: true,
-      icons: [
-        "https://tokens.muesliswap.com/static/img/tokens/533bb94a8850ee3ccbe483106489399112b74c905342cb1792a797a0.494e4459_scaled_100.webp",
-        "https://tokens.muesliswap.com/static/img/tokens/1d7f33bd23d85e1a25d87d86fac4f199c3197a2f7afeb662a0f34e1e.776f726c646d6f62696c65746f6b656e_scaled_100.webp",
-      ],
-    },
-    {
-      id: 3,
-      name: "My 3 Picks",
-      featured: true,
-      price: 0.518,
-      priceChange: -6.13,
-      totalLocked: 1912300,
-      inflow: 343.2,
-      outflow: 123.1,
-      fundFee: 1,
-      bookmarked: true,
-      icons: [
-        "https://tokens.muesliswap.com/static/img/tokens/1ddcb9c9de95361565392c5bdff64767492d61a96166cb16094e54be.4f5054_scaled_100.webp",
-        "https://tokens.muesliswap.com/static/img/tokens/1ddcb9c9de95361565392c5bdff64767492d61a96166cb16094e54be.4f5054_scaled_100.webp",
-      ],
-    },
-    {
-      id: 4,
-      name: "AI Fund",
-      featured: true,
-      price: 2.703,
-      priceChange: -3.03,
-      totalLocked: 14920,
-      inflow: 543,
-      outflow: 94,
-      fundFee: 0.1,
-      bookmarked: true,
-      icons: [
-        "https://tokens.muesliswap.com/static/img/tokens/1ddcb9c9de95361565392c5bdff64767492d61a96166cb16094e54be.4f5054_scaled_100.webp",
-        "https://tokens.muesliswap.com/static/img/tokens/1ddcb9c9de95361565392c5bdff64767492d61a96166cb16094e54be.4f5054_scaled_100.webp",
-      ],
-    },
-    {
-      id: 5,
-      name: "My MEME Fund Picks",
-      featured: true,
-      price: 8.871,
-      priceChange: 7.98,
-      totalLocked: 57345,
-      inflow: 3423,
-      outflow: 114,
-      fundFee: 0.5,
-      bookmarked: true,
-      icons: [
-        "https://tokens.muesliswap.com/static/img/tokens/1ddcb9c9de95361565392c5bdff64767492d61a96166cb16094e54be.4f5054_scaled_100.webp",
-        "https://tokens.muesliswap.com/static/img/tokens/a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235.484f534b59_scaled_100.webp",
-      ],
-    },
-  ],
-  all: [],
-  bookmarked: [],
-};
+
 export default function Overview() {
   const navigate = useNavigate();
-
+  const [tokens, setTokens] = useState<any>(null);
+  const [memes, setMemes] = useState<any>(null);
   const [fundsView, setFundsView] = useState<"featured" | "all" | "bookmarked">(
     "featured"
   );
   const [openFilterDrawer, setOpenFilterDrawer] = useState(false);
+  const { loading, makeRequest } = useRequest(
+    "https://api.xpmarket.com/api/trending/tokens"
+  );
+  const { loading: memeLoading, makeRequest: memeRequest } = useRequest(
+    "https://api.xpmarket.com/api/meme/pools?limit=10&offset=0&sort=created_at&sortDirection=desc&og=true"
+  );
+  useEffect(() => {
+    makeRequest().then((res) => {
+      console.log(res);
+      setTokens(res.data);
+    });
+    memeRequest().then((res) => {
+      console.log("Memes", res);
+      setMemes(res.data.items);
+    });
+  }, []);
   return (
     <>
       <div className="p-2 md:p-6 max-w-7xl mx-auto space-y-6">
@@ -211,32 +192,43 @@ export default function Overview() {
               <CardTitle className="text-lg">Top Changes (24 hours)</CardTitle>
             </CardHeader>
             <CardContent className="md:px-2">
-              {fundData.topChanges24h.map((fund, index) => (
-                <div
-                  key={index}
-                  onClick={() => navigate(`/details/${fund.name}`)}
-                  className="flex gap-4 items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
-                >
-                  <Icons
-                    tokenPic1={fund.tokenPic1}
-                    tokenPic2={fund.tokenPics2}
-                  />
-                  <div className="font-medium flex-col md:flex-row items-center gap-2">
-                    <p>{fund.name}</p>
-                    <div className="flex w-full justify-between items-center gap-5 text-sm">
-                      <p className="text-opacity-60 text-right">{fund.value}</p>
-                      <div className="flex items-center gap-1 text-green-500">
-                        <p className="">{fund.change}</p>
-                        {fund.change > 0 ? (
-                          <LucideArrowDown className="rotate-180" />
-                        ) : (
-                          <LucideArrowDown />
-                        )}
+              {tokens ? (
+                tokens.topLiquidityPairs.map((token: TradingPair, index) => (
+                  <div
+                    key={index}
+                    onClick={() => navigate(`/details/${token.title}`)}
+                    className="flex gap-4 items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
+                  >
+                    <Icons
+                      tokenPic1={token.logos[0]}
+                      tokenPic2={token.logos[1]}
+                    />
+                    <div className="font-medium flex-col md:flex-row items-center gap-2">
+                      <p>{token.title}</p>
+                      <div className="flex w-full justify-between items-center gap-5 text-sm">
+                        <p className="text-opacity-60 text-right">
+                          {token.liquidity_usd}
+                        </p>
+                        <div className="flex items-center gap-1 text-green-500">
+                          <p className="">
+                            {token.price1Usd.toFixed(2)} /
+                            {token.price2Usd.toFixed(2)}
+                          </p>
+                          {12 > 0 ? (
+                            <LucideArrowDown className="rotate-180" />
+                          ) : (
+                            <LucideArrowDown />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="flex justify-center items-center h-48">
+                  <LucideLoader className="h-6 w-6 animate-spin" />
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -244,22 +236,39 @@ export default function Overview() {
               <CardTitle className="text-lg">Top Inflow (7 days)</CardTitle>
             </CardHeader>
             <CardContent className="md:px-2">
-              {fundData.topInflow7d.map((fund, index) => (
-                <div
-                  key={index}
-                  onClick={() => navigate(`/details/${fund.name}`)}
-                  className="flex justify-between items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
-                >
-                  <div className="font-medium flex items-center gap-2">
-                    <Icons
+              {memes ? (
+                memes
+                  .filter((_, index) => index < 5)
+                  .map((meme: MemeToken, index) => (
+                    <div
+                      key={index}
+                      onClick={() => navigate(`/details/${meme.id}`)}
+                      className="flex justify-between items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
+                    >
+                      <div className="font-medium flex items-center gap-2">
+                        {/* <Icons
                       tokenPic1={fund.tokenPic1}
                       tokenPic2={fund.tokenPics2}
-                    />
-                    <p>{fund.name}</p>
-                  </div>
-                  <p className="text-opacity-60 text-right">{fund.inflow}</p>
+                    /> */}
+                        <div className="rounded-full size-9 bg-muted border border-white overflow-hidden">
+                          <img
+                            src={meme.logo}
+                            alt=""
+                            className="size-full object-cover"
+                          />
+                        </div>
+                        <p>{meme.title}</p>
+                      </div>
+                      <p className="text-opacity-60 text-right">
+                        {meme.liquidity}
+                      </p>
+                    </div>
+                  ))
+              ) : (
+                <div className="flex justify-center items-center h-48">
+                  <LucideLoader className="h-6 w-6 animate-spin" />
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -267,22 +276,39 @@ export default function Overview() {
               <CardTitle className="text-lg">Top Outflow (7 days)</CardTitle>
             </CardHeader>
             <CardContent className="md:px-2">
-              {fundData.topOutflow7d.map((fund, index) => (
-                <div
-                  key={index}
-                  onClick={() => navigate(`/details/${fund.name}`)}
-                  className="flex justify-between items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
-                >
-                  <div className="font-medium flex items-center gap-2">
-                    <Icons
+              {memes ? (
+                memes
+                  .filter((_, index) => index > 4 && index < 10)
+                  .map((meme: MemeToken, index) => (
+                    <div
+                      key={index}
+                      onClick={() => navigate(`/details/${meme.id}`)}
+                      className="flex justify-between items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
+                    >
+                      <div className="font-medium flex items-center gap-2">
+                        {/* <Icons
                       tokenPic1={fund.tokenPic1}
                       tokenPic2={fund.tokenPics2}
-                    />
-                    <p>{fund.name}</p>
-                  </div>
-                  <p className="text-opacity-60 text-right">{fund.outflow}</p>
+                    /> */}
+                        <div className="rounded-full size-9 bg-muted border border-white overflow-hidden">
+                          <img
+                            src={meme.logo}
+                            alt=""
+                            className="size-full object-cover"
+                          />
+                        </div>
+                        <p>{meme.title}</p>
+                      </div>
+                      <p className="text-opacity-60 text-right">
+                        {meme.liquidity}
+                      </p>
+                    </div>
+                  ))
+              ) : (
+                <div className="flex justify-center items-center h-48">
+                  <LucideLoader className="h-6 w-6 animate-spin" />
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </div>
@@ -358,7 +384,12 @@ export default function Overview() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <FundTable funds={fundsTableData[fundsView]} />
+                  {tokens && <FundTable funds={tokens.tokens} />}
+                  {loading && (
+                    <div className="flex justify-center items-center h-96">
+                      <LucideLoader className="h-6 w-6 animate-spin" />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

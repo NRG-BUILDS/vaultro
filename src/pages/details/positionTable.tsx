@@ -49,8 +49,8 @@ export default function PositionTable({ funds }: Props) {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead className="text-right">Price (ADA)</TableHead>
-            <TableHead className="text-right">Market Cap (ADA)</TableHead>
+            <TableHead className="text-right">Price (XRP)</TableHead>
+            <TableHead className="text-right">Market Cap (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
             <TableHead className="text-right">Volume 24h</TableHead>
             <TableHead className="text-right">Share (%)</TableHead>

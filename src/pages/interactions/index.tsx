@@ -6,6 +6,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import InteractionsTable from "./interactions-table";
+import { useEffect, useState } from "react";
+import useRequest from "@/hooks/use-request";
+import { LucideLoader } from "lucide-react";
 
 const fundData = [
   {
@@ -131,6 +134,17 @@ const fundData = [
 ];
 
 const Interactions = () => {
+  const [tokens, setTokens] = useState<any>(null);
+  const { loading, makeRequest } = useRequest(
+    "https://api.xpmarket.com/api/trending/tokens"
+  );
+
+  useEffect(() => {
+    makeRequest().then((res) => {
+      console.log(res);
+      setTokens(res.data);
+    });
+  }, []);
   return (
     <div className="p-4 md:p-6">
       <Card className="w-full">
@@ -141,7 +155,12 @@ const Interactions = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <InteractionsTable funds={fundData} />
+          {tokens && <InteractionsTable funds={tokens.tokens} />}
+          {loading && (
+            <div className="flex items-center justify-center">
+              <LucideLoader className="h-6 w-6 animate-spin" />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -176,7 +176,7 @@ const Details = () => {
               <div className="pb-8">
                 {[
                   {
-                    name: "Total Value Locked (ADA)",
+                    name: "Total Value Locked (XRP)",
                     value: "totalValueLocked",
                   },
                   {
@@ -184,7 +184,7 @@ const Details = () => {
                     value: "tokens",
                   },
                   {
-                    name: "Price per Fund token (ADA)",
+                    name: "Price per Fund token (XRP)",
                     value: "pricePerToken",
                   },
                   {

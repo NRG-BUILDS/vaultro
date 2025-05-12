@@ -108,9 +108,9 @@ export default function PositionsTable({ funds }: Props) {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead className="text-right">Price (ADA)</TableHead>
+            <TableHead className="text-right">Price (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
-            <TableHead className="text-right">Total locked (ADA)</TableHead>
+            <TableHead className="text-right">Total locked (XRP)</TableHead>
             <TableHead className="text-right">Inflow 7d</TableHead>
             <TableHead className="text-right">Outflow 7d</TableHead>
             <TableHead className="text-right">Fund Fee</TableHead>

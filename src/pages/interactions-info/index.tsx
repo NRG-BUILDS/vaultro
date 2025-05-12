@@ -194,7 +194,7 @@ const InteractionsInfo = () => {
             <div className="pb-8 grid lg:justify-between lg:grid-cols-2 gap-4 lg:gap-x-6">
               {[
                 {
-                  name: "Price (ADA)",
+                  name: "Price (XRP)",
                   value: data.metrics.inflow7d,
                 },
                 {
@@ -210,7 +210,7 @@ const InteractionsInfo = () => {
                   value: data.metrics.outflow7d,
                 },
                 {
-                  name: "Total Value Locked (ADA)",
+                  name: "Total Value Locked (XRP)",
                   value: data.metrics.totalValueLocked,
                 },
                 {

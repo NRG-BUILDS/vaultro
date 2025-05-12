@@ -28,27 +28,47 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import RangeSlider from "@/components/ui/range-slider";
 
+interface Badge {
+  id: string;
+  src: string;
+}
+
+export interface TokenDetails {
+  id: number;
+  code: string;
+  issuer: string;
+  title: string;
+  gravatar: string;
+  marketcap: number;
+  trustlines: number;
+  holders: number;
+  twitter: string;
+  followers: number;
+  placeInTop: number;
+  liquidity: string;
+  traders: string;
+  last_price: number;
+  sparkline: number[];
+  volume: number;
+  volume_dex: number;
+  xrp_price: number;
+  price_change: number;
+  price_change_7d: number;
+  badge: Badge;
+  score: number;
+  liquidity_usd: number;
+}
+
 interface Props {
-  funds: {
-    id: number;
-    name: string;
-    featured: boolean;
-    price: number;
-    priceChange: number;
-    totalLocked: number;
-    inflow: number;
-    outflow: number;
-    fundFee: number;
-    bookmarked: boolean;
-    icons: string[];
-  }[];
+  funds: TokenDetails[];
 }
 
 export default function FundTable({ funds }: Props) {
   const [search, setSearch] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
   const filteredFunds = funds.filter((fund) =>
-    fund.name.toLowerCase().includes(search.toLowerCase())
+    fund.title?.toLowerCase().includes(search.toLowerCase())
   );
   // Format numbers with commas for thousands
   const formatNumber = (num) => {
@@ -121,22 +141,21 @@ export default function FundTable({ funds }: Props) {
           </DropdownMenu>
         </div>
       </div>
-
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-8"></TableHead>
             <TableHead>Name</TableHead>
-            <TableHead className="text-right">Price (ADA)</TableHead>
+            <TableHead className="text-right">Price (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
-            <TableHead className="text-right">Total locked (ADA)</TableHead>
-            <TableHead className="text-right">Inflow (ADA) 7d</TableHead>
-            <TableHead className="text-right">Outflow (ADA) 7d</TableHead>
+            <TableHead className="text-right">Total locked (XRP)</TableHead>
+            <TableHead className="text-right">Inflow (XRP) 7d</TableHead>
+            <TableHead className="text-right">Outflow (XRP) 7d</TableHead>
             <TableHead className="text-right">Fund Fee</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredFunds.map((fund) => (
+          {filteredFunds.map((fund, index) => (
             <TableRow
               key={fund.id}
               onClick={() => navigate(`/details/${fund.id}`)}
@@ -146,54 +165,60 @@ export default function FundTable({ funds }: Props) {
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <Bookmark
                     className="h-4 w-4"
-                    fill={fund.bookmarked ? "#6C5DD3" : "none"}
-                    stroke={fund.bookmarked ? "#6C5DD3" : "currentColor"}
+                    fill={isBookmarked ? "#6C5DD3" : "none"}
+                    stroke={isBookmarked ? "#6C5DD3" : "currentColor"}
                   />
                 </Button>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Icons tokenPic1={fund.icons[0]} tokenPic2={fund.icons[1]} />
+                  {/* <Icons
+                    tokenPic1={fund.badge?.src}
+                    tokenPic2={fund.gravatar}
+                  /> */}
+                  <div className="rounded-full min-w-9 size-9 bg-muted border border-white overflow-hidden">
+                    <img
+                      src={fund.gravatar}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  </div>
                   <div className="flex flex-col">
-                    <span>{fund.name}</span>
-                    {fund.featured && (
+                    <span>{fund.title}</span>
+                    {index % 2 ? (
                       <Badge
                         variant="secondary"
                         className="text-xs bg-primary/10 text-primary px-2 py-0.5 w-fit"
                       >
                         Featured
                       </Badge>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {fund.price.toFixed(3)}
+                {fund.xrp_price.toFixed(3)}
               </TableCell>
               <TableCell className="text-right">
                 <div
                   className={`flex items-center justify-end ${
-                    fund.priceChange >= 0 ? "text-green-500" : "text-red-500"
+                    fund.price_change >= 0 ? "text-green-500" : "text-red-500"
                   }`}
                 >
-                  {fund.priceChange >= 0 ? (
+                  {fund.price_change >= 0 ? (
                     <ArrowUpRight className="h-4 w-4 mr-1" />
                   ) : (
                     <ArrowDownRight className="h-4 w-4 mr-1" />
                   )}
-                  {Math.abs(fund.priceChange).toFixed(2)}%
+                  {Math.abs(fund.price_change).toFixed(2)}%
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.totalLocked)}
+                {formatNumber(fund.liquidity)}
               </TableCell>
-              <TableCell className="text-right">
-                {formatNumber(fund.inflow)}
-              </TableCell>
-              <TableCell className="text-right">
-                {formatNumber(fund.outflow)}
-              </TableCell>
-              <TableCell className="text-right">{fund.fundFee}%</TableCell>
+              <TableCell className="text-right">{"---"}</TableCell>
+              <TableCell className="text-right">{"---"}</TableCell>
+              <TableCell className="text-right">{"---"}%</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -202,7 +227,7 @@ export default function FundTable({ funds }: Props) {
       <div className="flex justify-center mt-4">
         <Button
           variant="default"
-          className="rounded-full bg-purple-600 hover:bg-purple-700 w-8 h-8 p-0"
+          className="rounded-full bg-primary hover:bg-secondary w-8 h-8 p-0"
         >
           1
         </Button>
