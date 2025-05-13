@@ -148,10 +148,10 @@ export default function FundTable({ funds }: Props) {
             <TableHead>Name</TableHead>
             <TableHead className="text-right">Price (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
-            <TableHead className="text-right">Total locked (XRP)</TableHead>
-            <TableHead className="text-right">Inflow (XRP) 7d</TableHead>
-            <TableHead className="text-right">Outflow (XRP) 7d</TableHead>
-            <TableHead className="text-right">Fund Fee</TableHead>
+            <TableHead className="text-right">Liquidity (XRP)</TableHead>
+            <TableHead className="text-right">Market Cap</TableHead>
+            <TableHead className="text-right">Volume</TableHead>
+            <TableHead className="text-right">Place in Top</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -216,9 +216,13 @@ export default function FundTable({ funds }: Props) {
               <TableCell className="text-right">
                 {formatNumber(fund.liquidity)}
               </TableCell>
-              <TableCell className="text-right">{"---"}</TableCell>
-              <TableCell className="text-right">{"---"}</TableCell>
-              <TableCell className="text-right">{"---"}%</TableCell>
+              <TableCell className="text-right">
+                {fund.marketcap.toFixed(3)}
+              </TableCell>
+              <TableCell className="text-right">
+                {fund.volume.toFixed(3)}
+              </TableCell>
+              <TableCell className="text-right">{fund.placeInTop}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -69,7 +69,7 @@ const CreateFund = () => {
     description: "",
     creatorName: "",
     hideName: false,
-    ada: "",
+    XRP: "",
     addCommission: false,
     address: "",
     fee: "",
@@ -134,7 +134,7 @@ const CreateFund = () => {
                           setSelectedTokens([...selectedTokens, token]);
                         }
                       }}
-                      className="text-lg hover:text-primary"
+                      className="text-lg hover:text-destructive"
                     >
                       <LucideXCircle />
                     </button>
@@ -203,7 +203,7 @@ interface CreateFundFormProps {
     description: string;
     creatorName: string;
     hideName: boolean;
-    ada: string;
+    XRP: string;
     addCommission: boolean;
     address: string;
     fee: string;
@@ -274,13 +274,13 @@ function CreateFundForm({ formState, setFormState }: CreateFundFormProps) {
           <span className="text-sm">Hide my name</span>
         </label>
 
-        {/* Add ADA Input */}
+        {/* Add XRP Input */}
         <div>
           <Label
-            htmlFor="ada"
+            htmlFor="XRP"
             className="w-full py-1 flex items-center justify-between"
           >
-            <span>Add ADA to fund (min:100 ADA)</span>
+            <span>Add XRP to fund (min:100 XRP)</span>
             <div className="flex items-center text-sm text-gray-500">
               <Wallet className="h-4 w-4 mr-1" />
               To see balance, connect your wallet
@@ -288,15 +288,15 @@ function CreateFundForm({ formState, setFormState }: CreateFundFormProps) {
           </Label>
           <div className="relative">
             <Input
-              id="ada"
-              name="ada"
+              id="XRP"
+              name="XRP"
               type="number"
               placeholder="0"
-              value={formState.ada}
+              value={formState.XRP}
               onChange={handleInputChange}
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-              ADA
+              XRP
             </div>
           </div>
         </div>

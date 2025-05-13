@@ -9,11 +9,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { CardFooter } from "@/components/ui/card";
-const chartData = [
-  { token: "AGIX", allocation: 50, fill: "var(--color-chrome)" },
-  { token: "COPI", allocation: 10, fill: "var(--color-safari)" },
-  { token: "WMT", allocation: 20, fill: "var(--color-firefox)" },
-];
+import { TokenDetails } from "../overview/fund-table";
 
 const chartConfig = {
   allocation: {
@@ -41,7 +37,12 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function AllocationChart() {
+export function AllocationChart({ tokens }: { tokens: TokenDetails[] }) {
+  const chartData = [
+    { token: tokens[0].code, allocation: 50, fill: "var(--color-chrome)" },
+    { token: tokens[1].code, allocation: 10, fill: "var(--color-safari)" },
+    { token: tokens[2].code, allocation: 20, fill: "var(--color-firefox)" },
+  ];
   return (
     <>
       <ChartContainer
@@ -67,7 +68,7 @@ export function AllocationChart() {
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: entry.fill }}
               ></div>
-              <span>{entry.token}</span>
+              <span>{tokens[index].code || ""}</span>
             </div>
           ))}
         </div>

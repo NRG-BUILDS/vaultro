@@ -1,20 +1,9 @@
 import { useState } from "react";
-import {
-  ChevronDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  Bookmark,
-  Search,
-} from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Search } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Table,
   TableBody,
@@ -66,10 +55,10 @@ export default function InteractionsTable({ funds }: Props) {
             <TableHead>Name</TableHead>
             <TableHead className="text-right">Price (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
-            <TableHead className="text-right">Total locked (XRP)</TableHead>
-            <TableHead className="text-right">Inflow 7d</TableHead>
-            <TableHead className="text-right">Outflow 7d</TableHead>
-            <TableHead className="text-right">Fund Fee</TableHead>
+            <TableHead className="text-right">Liquidity (XRP)</TableHead>
+            <TableHead className="text-right">Market Cap</TableHead>
+            <TableHead className="text-right">Volume</TableHead>
+            <TableHead className="text-right">Place in Top</TableHead>
             <TableHead className="w-8"></TableHead>
           </TableRow>
         </TableHeader>
@@ -118,12 +107,12 @@ export default function InteractionsTable({ funds }: Props) {
                 {formatNumber(fund.liquidity)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.price_change_7d)}
+                {fund.marketcap.toFixed(3)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber("---")}
+                {fund.volume.toFixed(3)}
               </TableCell>
-              <TableCell className="text-right">{"---"}%</TableCell>
+              <TableCell className="text-right">{fund.placeInTop}</TableCell>
               <TableCell className="text-right">
                 <Button
                   size="sm"

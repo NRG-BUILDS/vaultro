@@ -12,25 +12,16 @@ import {
 } from "@/components/ui/table";
 import { Icons } from "@/components/ui/icons";
 import { Badge } from "@/components/ui/badge";
+import { TokenDetails } from "../overview/fund-table";
 
 interface Props {
-  funds: {
-    id: string;
-    name: string;
-    fullName: string;
-    icon: string;
-    price: number;
-    marketCap: number;
-    priceChange24h: number;
-    volume24h: number;
-    share: number;
-  }[];
+  funds: TokenDetails[];
 }
 
 export default function PositionTable({ funds }: Props) {
   const [search, setSearch] = useState("");
   const filteredFunds = funds.filter((fund) =>
-    fund.name.toLowerCase().includes(search.toLowerCase())
+    fund.title?.toLowerCase().includes(search.toLowerCase())
   );
   // Format numbers with commas for thousands
   const formatNumber = (num) => {
@@ -53,7 +44,7 @@ export default function PositionTable({ funds }: Props) {
             <TableHead className="text-right">Market Cap (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
             <TableHead className="text-right">Volume 24h</TableHead>
-            <TableHead className="text-right">Share (%)</TableHead>
+            <TableHead className="text-right">Liquidity</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -61,37 +52,43 @@ export default function PositionTable({ funds }: Props) {
             <TableRow key={fund.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Icons tokenPic1={fund.icon} tokenPic2={fund.icon} />
+                  <div className="rounded-full size-9 bg-muted border border-white overflow-hidden">
+                    <img
+                      src={fund.gravatar}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  </div>{" "}
                   <div className="flex flex-col">
-                    <span>{fund.name}</span>
+                    <span>{fund.title}</span>
                   </div>
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {fund.price.toFixed(3)}
+                {fund.xrp_price.toFixed(3)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.marketCap)}
+                {formatNumber(fund.marketcap)}
               </TableCell>
               <TableCell className="text-right">
                 <div
                   className={`flex items-center justify-end ${
-                    fund.priceChange24h >= 0 ? "text-green-500" : "text-red-500"
+                    fund.price_change >= 0 ? "text-green-500" : "text-red-500"
                   }`}
                 >
-                  {fund.priceChange24h >= 0 ? (
+                  {fund.price_change >= 0 ? (
                     <ArrowUpRight className="h-4 w-4 mr-1" />
                   ) : (
                     <ArrowDownRight className="h-4 w-4 mr-1" />
                   )}
-                  {Math.abs(fund.priceChange24h).toFixed(2)}%
+                  {Math.abs(fund.price_change).toFixed(2)}%
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.volume24h)}
+                {formatNumber(fund.volume)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.share)}%
+                {formatNumber(fund.liquidity)}
               </TableCell>
             </TableRow>
           ))}

@@ -8,11 +8,13 @@ import {
 } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
 import { LucideArrowLeft, LucideBookmark } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AllocationChart } from "./piechart";
 import PositionTable from "./positionTable";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import useRequest from "@/hooks/use-request";
+import { TokenDetails } from "../overview/fund-table";
 
 const apiResponse = {
   status: "success",
@@ -134,7 +136,17 @@ const formatNumber = (num: number) => {
 
 const Details = () => {
   const [data] = React.useState(apiResponse.data.fund);
-  const [tokenPositions] = React.useState(apiResponse.data.tokenPositions);
+  const [tokens, setTokens] = useState<TokenDetails[]>(null);
+  const { loading, makeRequest } = useRequest(
+    "https://api.xpmarket.com/api/trending/tokens"
+  );
+
+  useEffect(() => {
+    makeRequest().then((res) => {
+      console.log(res);
+      setTokens(res.data?.tokens?.filter((_, index) => index < 3));
+    });
+  }, []);
   const goBack = () => {
     if (window.history.length > 1) {
       window.history.back();
@@ -144,97 +156,103 @@ const Details = () => {
   };
   return (
     <div className="p-4 md:p-6">
-      <div className="grid gap-6">
-        <Card>
-          <CardContent className="flex flex-col gap-5 md:flex-row md:items-center justify-between">
-            <div className="flex gap-2 items-center">
-              <button onClick={goBack}>
-                <LucideArrowLeft />
-              </button>
-              <Icons tokenPic1="" tokenPic2="" />
-              <h1 className="text-xl font-bold">{data.name}</h1>
-            </div>
-            <div className="md:flex-row-reverse flex gap-2 items-center">
-              <Button asChild variant="secondary" className="rounded-full">
-                <Link to={`/interactions-info/${data.id}`}>
-                  Add/Remove from Fund
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <LucideBookmark />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="grid lg:grid-cols-12 gap-6">
-          <Card className="lg:col-span-4">
-            <CardHeader>
-              <CardTitle>About Fund</CardTitle>
-              <CardDescription> {data.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="">
-              <div className="pb-8">
-                {[
-                  {
-                    name: "Total Value Locked (XRP)",
-                    value: "totalValueLocked",
-                  },
-                  {
-                    name: "Tokens",
-                    value: "tokens",
-                  },
-                  {
-                    name: "Price per Fund token (XRP)",
-                    value: "pricePerToken",
-                  },
-                  {
-                    name: "Inflow 7 days",
-                    value: "inflow7d",
-                  },
-                  {
-                    name: "Outflow 7 days",
-                    value: "outflow7d",
-                  },
-                ].map((metric) => (
-                  <div className="flex gap-1 items-end py-2">
-                    <p className="min-w-fit whitespace-nowrap">
-                      {metric.name}{" "}
-                    </p>
-                    <div className="border-b border-dashed w-full"></div>
-                    <p className="font-medium">
-                      {formatNumber(data.metrics[metric.value])}
-                    </p>
-                  </div>
-                ))}
+      {tokens ? (
+        <div className="grid gap-6">
+          <Card>
+            <CardContent className="flex flex-col gap-5 md:flex-row md:items-center justify-between">
+              <div className="flex gap-2 items-center">
+                <button onClick={goBack}>
+                  <LucideArrowLeft />
+                </button>
+                <Icons tokenPic1={tokens[0]?.gravatar || ""} />
+                <h1 className="text-xl font-bold">{data.name}</h1>
+              </div>
+              <div className="md:flex-row-reverse flex gap-2 items-center">
+                <Button asChild variant="secondary" className="rounded-full">
+                  <Link to={`/interactions-info/${data.id}`}>
+                    Add/Remove from Fund
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <LucideBookmark />
+                </Button>
               </div>
             </CardContent>
           </Card>
-          <Card className="lg:col-span-4">
+          <div className="grid lg:grid-cols-12 gap-6">
+            <Card className="lg:col-span-4">
+              <CardHeader>
+                <CardTitle>About Fund</CardTitle>
+                <CardDescription> {data.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="">
+                <div className="pb-8">
+                  {[
+                    {
+                      name: "Total Value Locked (XRP)",
+                      value: "totalValueLocked",
+                    },
+                    {
+                      name: "Tokens",
+                      value: "tokens",
+                    },
+                    {
+                      name: "Price per Fund token (XRP)",
+                      value: "pricePerToken",
+                    },
+                    {
+                      name: "Inflow 7 days",
+                      value: "inflow7d",
+                    },
+                    {
+                      name: "Outflow 7 days",
+                      value: "outflow7d",
+                    },
+                  ].map((metric) => (
+                    <div className="flex gap-1 items-end py-2">
+                      <p className="min-w-fit whitespace-nowrap">
+                        {metric.name}{" "}
+                      </p>
+                      <div className="border-b border-dashed w-full"></div>
+                      <p className="font-medium">
+                        {formatNumber(data.metrics[metric.value])}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="lg:col-span-4">
+              <CardHeader>
+                <CardTitle>Token Allocation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AllocationChart tokens={tokens} />
+              </CardContent>
+            </Card>
+            <div className="lg:col-span-4 grid gap-6 min-h-[400px]">
+              <Card className="lg:col-span-4 border-dashed border-4 flex items-center justify-center">
+                <p className="text-muted-foreground">Feature Coming Soon!</p>
+              </Card>
+              <Card className="lg:col-span-4 border-dashed border-4 flex items-center justify-center">
+                <p className="text-muted-foreground">Feature Coming Soon!</p>
+              </Card>
+            </div>
+          </div>
+          <Card className="">
             <CardHeader>
               <CardTitle>Token Allocation</CardTitle>
             </CardHeader>
-            <CardContent>
-              <AllocationChart />
+            <CardContent className="grid gap-4">
+              <PositionTable funds={tokens} />
             </CardContent>
           </Card>
-          <div className="lg:col-span-4 grid gap-6 min-h-[400px]">
-            <Card className="lg:col-span-4 border-dashed border-4 flex items-center justify-center">
-              <p className="text-muted-foreground">Feature Coming Soon!</p>
-            </Card>
-            <Card className="lg:col-span-4 border-dashed border-4 flex items-center justify-center">
-              <p className="text-muted-foreground">Feature Coming Soon!</p>
-            </Card>
-          </div>
         </div>
-        <Card className="">
-          <CardHeader>
-            <CardTitle>Token Allocation</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <PositionTable funds={tokenPositions} />
-          </CardContent>
-        </Card>
-      </div>
+      ) : (
+        <div className="h-full min-h-[90svh] flex items-center justify-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      )}
     </div>
   );
 };
