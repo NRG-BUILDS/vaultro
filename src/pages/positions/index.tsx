@@ -7,7 +7,10 @@ import {
 } from "@/components/ui/card";
 import PositionsTable from "./positions-table";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import useRequest from "@/hooks/use-request";
+import { TokenDetails } from "../overview/fund-table";
+import { LucideLoader } from "lucide-react";
 
 const fundData = [
   {
@@ -136,6 +139,17 @@ const Positions = () => {
   const [fundsView, setFundsView] = useState<"open-positions" | "history">(
     "open-positions"
   );
+  const [tokens, setTokens] = useState<TokenDetails[] | null>(null);
+  const { loading, makeRequest } = useRequest(
+    "https://api.xpmarket.com/api/trending/tokens"
+  );
+
+  useEffect(() => {
+    makeRequest().then((res) => {
+      console.log(res);
+      setTokens(res.data.tokens);
+    });
+  }, []);
   return (
     <div className="p-4 md:p-6">
       <Card className="w-full">
@@ -162,7 +176,13 @@ const Positions = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <PositionsTable funds={fundData} />
+          {tokens ? (
+            <PositionsTable funds={tokens} />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <LucideLoader className="text-foreground animate-spin" />{" "}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

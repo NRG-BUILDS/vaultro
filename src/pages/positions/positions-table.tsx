@@ -1,20 +1,9 @@
 import { useState } from "react";
-import {
-  ChevronDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  Bookmark,
-  Search,
-} from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Search } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Table,
   TableBody,
@@ -25,27 +14,17 @@ import {
 } from "@/components/ui/table";
 import { Icons } from "@/components/ui/icons";
 import { Badge } from "@/components/ui/badge";
-import RangeSlider from "@/components/ui/range-slider";
+import { Link } from "react-router-dom";
+import { TokenDetails } from "../overview/fund-table";
 
 interface Props {
-  funds: {
-    id: number;
-    name: string;
-    icons: string[];
-    featured: boolean;
-    price: number;
-    priceChange: number;
-    totalLocked: number;
-    inflow7d: number;
-    outflow7d: number;
-    fundFee: number;
-  }[];
+  funds: TokenDetails[];
 }
 
-export default function PositionsTable({ funds }: Props) {
+export default function InteractionsTable({ funds }: Props) {
   const [search, setSearch] = useState("");
   const filteredFunds = funds.filter((fund) =>
-    fund.name.toLowerCase().includes(search.toLowerCase())
+    fund.title?.toLowerCase().includes(search.toLowerCase())
   );
   // Format numbers with commas for thousands
   const formatNumber = (num) => {
@@ -60,48 +39,14 @@ export default function PositionsTable({ funds }: Props) {
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="flex items-center justify-between mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search by name"
-            className="pl-10 w-48 bg-primary/5 rounded-full text-sm"
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2 *:hover:text-foreground hover:*:bg-accent/30">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-1">
-                Total Locked
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="max-w-[200px]">
-              <RangeSlider
-                minValue={0}
-                maxValue={25892342}
-                // onChange={add the form field here}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-1">
-                Price Change
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="max-w-[200px]">
-              <RangeSlider
-                isPercentage
-                // onChange={add the form field here}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+        <Input
+          type="text"
+          placeholder="Search by name"
+          className="pl-10 w-full bg-primary/5 border-0 rounded-full text-sm"
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       <Table>
@@ -110,10 +55,10 @@ export default function PositionsTable({ funds }: Props) {
             <TableHead>Name</TableHead>
             <TableHead className="text-right">Price (XRP)</TableHead>
             <TableHead className="text-right">Price Change 24h</TableHead>
-            <TableHead className="text-right">Total locked (XRP)</TableHead>
-            <TableHead className="text-right">Inflow 7d</TableHead>
-            <TableHead className="text-right">Outflow 7d</TableHead>
-            <TableHead className="text-right">Fund Fee</TableHead>
+            <TableHead className="text-right">Liquidity (XRP)</TableHead>
+            <TableHead className="text-right">Market Cap</TableHead>
+            <TableHead className="text-right">Volume</TableHead>
+            <TableHead className="text-right">Place in Top</TableHead>
             <TableHead className="w-8"></TableHead>
           </TableRow>
         </TableHeader>
@@ -122,53 +67,59 @@ export default function PositionsTable({ funds }: Props) {
             <TableRow key={fund.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Icons tokenPic1={fund.icons[0]} tokenPic2={fund.icons[1]} />
+                  {/* <Icons tokenPic1={fund.icons[0]} tokenPic2={fund.icons[1]} /> */}
+                  <div className="rounded-full size-9 bg-muted border border-white overflow-hidden">
+                    <img
+                      src={fund.gravatar}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  </div>
                   <div className="flex flex-col">
-                    <span>{fund.name}</span>
-                    {fund.featured && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs bg-primary/10 text-primary px-2 py-0.5 w-fit"
-                      >
-                        Featured
-                      </Badge>
-                    )}
+                    <span>{fund.title}</span>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-primary/10 text-primary px-2 py-0.5 w-fit"
+                    >
+                      Featured
+                    </Badge>
                   </div>
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {fund.price.toFixed(3)}
+                {fund.xrp_price.toFixed(3)}
               </TableCell>
               <TableCell className="text-right">
                 <div
                   className={`flex items-center justify-end ${
-                    fund.priceChange >= 0 ? "text-green-500" : "text-red-500"
+                    fund.price_change >= 0 ? "text-green-500" : "text-red-500"
                   }`}
                 >
-                  {fund.priceChange >= 0 ? (
+                  {fund.price_change >= 0 ? (
                     <ArrowUpRight className="h-4 w-4 mr-1" />
                   ) : (
                     <ArrowDownRight className="h-4 w-4 mr-1" />
                   )}
-                  {Math.abs(fund.priceChange).toFixed(2)}%
+                  {Math.abs(fund.price_change).toFixed(2)}%
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.totalLocked)}
+                {formatNumber(fund.liquidity)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.inflow7d)}
+                {fund.marketcap.toFixed(3)}
               </TableCell>
               <TableCell className="text-right">
-                {formatNumber(fund.outflow7d)}
+                {fund.volume.toFixed(3)}
               </TableCell>
-              <TableCell className="text-right">{fund.fundFee}%</TableCell>
+              <TableCell className="text-right">{fund.placeInTop}</TableCell>
               <TableCell className="text-right">
                 <Button
                   size="sm"
+                  asChild
                   className="bg-primary/10 text-xs hover:bg-primary/20 text-primary"
                 >
-                  Details
+                  <Link to={`/details/${fund.id}`}>Details</Link>
                 </Button>
               </TableCell>
             </TableRow>
