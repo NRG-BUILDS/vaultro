@@ -27,7 +27,7 @@ const apiResponse = {
       name: "Market Cap Top 3",
       featured: true,
       icons: ["BTC", "ETH", "BNB"],
-      description: "A fund with the Top 3 Cardano Native Assets by Market Cap.",
+      description: "A Fund with the Top 3 XRPL Tokens by Market Cap",
       creator: "Vaultro Financ Team",
       fee: 0,
       metrics: {
@@ -239,7 +239,7 @@ const InteractionsInfo = () => {
                     htmlFor="addInput"
                     className="w-full py-1 flex items-center justify-between"
                   >
-                    <span>Enter ADA amount</span>
+                    <span>Enter XRP amount</span>
                     <div className="flex items-center text-sm text-gray-500">
                       <Wallet className="h-4 w-4 mr-1" />
                       To see balance, connect your wallet
