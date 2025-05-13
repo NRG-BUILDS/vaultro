@@ -39,7 +39,7 @@ export function WalletPopup({ open, onOpenChange }: PricingPopupProps) {
         </DialogHeader>
 
         <SelectWallet
-          wallets={["MetaMask", "Coinbase", "WalletConnect"]}
+          wallets={["Xamam Wallet"]}
           handleConfirm={handleSubscribe}
         />
       </DialogContent>
@@ -63,12 +63,12 @@ export const SelectWallet = ({ wallets, handleConfirm }: Props) => {
       <RadioGroup
         value={selectedWallet}
         onValueChange={(value) => setSelectedWallet(value)}
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        className="grid gap-4"
       >
         {wallets.map((wallet) => (
           <div
             key={wallet}
-            className={`border rounded-lg p-4 relative aspect-square items-center justify-center flex ${
+            className={`border rounded-lg p-4 py-10 relative aspect- items-center justify-center flex ${
               selectedWallet === wallet
                 ? "border-primary bg-primary/5 dark:bg-primary/10"
                 : ""
