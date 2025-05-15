@@ -196,7 +196,7 @@ export default function Overview() {
                 tokens.topLiquidityPairs.map((token: TradingPair, index) => (
                   <div
                     key={index}
-                    onClick={() => navigate(`/details/${token.title}`)}
+                    onClick={() => navigate(`/details/${token.id}`)}
                     className="flex gap-4 items-center hover:bg-accent/10 hover:text-accent transition-all p-2 rounded-lg cursor-pointer"
                   >
                     <Icons
