@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Wallet, ChevronDown, LucideXCircle } from "lucide-react";
 import {
   Select,
@@ -19,51 +19,15 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-const tokens = [
-  {
-    name: "WMT",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/1d7f33bd23d85e1a25d87d86fac4f199c3197a2f7afeb662a0f34e1e.776f726c646d6f62696c65746f6b656e_scaled_100.webp",
-    address: "1d7...f34e1",
-  },
-  {
-    name: "MILK",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/afbe91c0b44b3040e360057bf8354ead8c49c4979ae6ab7c4fbdc9eb.4d494c4b7632_scaled_100.webp",
-    address: "afb...bdc9eb",
-  },
-  {
-    name: "PBX",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/cc8d1b026353022abbfcc2e1e71159f9e308d9c6e905ac1db24c7fb6.50617269627573_scaled_100.webp",
-    address: "cc8...4c7fb6",
-  },
-  {
-    name: "MELD",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/a2944573e99d2ed3055b808eaa264f0bf119e01fc6b18863067c63e4.4d454c44_scaled_100.webp",
-    address: "a29...7c63e4",
-  },
-  {
-    name: "EMP",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/6c8642400e8437f737eb86df0fc8a8437c760f48592b1ba8f5767e81.456d706f7761_scaled_100.webp",
-    address: "6c8...767e81",
-  },
-  {
-    name: "DJED",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/7914fae20eb2903ed6fd5021a415c1bd2626b64a2d86a304cb40ff5e.4c494649_scaled_100.webp",
-    address: "8db...a1cd61",
-  },
-  {
-    name: "OPT",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/1ddcb9c9de95361565392c5bdff64767492d61a96166cb16094e54be.4f5054_scaled_100.webp",
-    address: "1dd...4e54be",
-  },
-  {
-    name: "LIFI",
-    icon: "https://tokens.muesliswap.com/static/img/tokens/8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd61.446a65644d6963726f555344_scaled_100.webp",
-    address: "791...40ff5e",
-  },
-];
+import useRequest from "@/hooks/use-request";
+import { TokenDetails } from "../overview/fund-table";
 
 const CreateFund = () => {
+  const [tokens, setTokens] = useState<TokenDetails[] | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [selectedTokens, setSelectedTokens] = useState<TokenDetails[]>([]);
+  const [filteredTokens, setFilteredTokens] = useState<TokenDetails[]>([]);
   const [formState, setFormState] = useState({
     fundName: "",
     description: "",
@@ -75,14 +39,27 @@ const CreateFund = () => {
     fee: "",
     selectedTokens: [],
   });
-
-  const [search, setSearch] = useState("");
-  const [selectedTokens, setSelectedTokens] = useState([]);
-  const filteredTokens = tokens.filter(
-    (token) =>
-      token.name.toLowerCase().includes(search.toLowerCase()) &&
-      !selectedTokens.includes(token)
+  const { loading, makeRequest } = useRequest(
+    "https://api.xpmarket.com/api/trending/tokens"
   );
+
+  useEffect(() => {
+    makeRequest().then((res) => {
+      console.log(res);
+      setTokens(res.data.tokens);
+    });
+  }, []);
+  useEffect(() => {
+    if (tokens) {
+      const filtered = tokens.filter(
+        (token) =>
+          (token.code?.toLowerCase().includes(search.toLowerCase()) ||
+            token.title?.toLowerCase().includes(search.toLowerCase())) &&
+          !selectedTokens.includes(token)
+      );
+      setFilteredTokens(filtered);
+    }
+  }, [search, selectedTokens, tokens]);
   return (
     <>
       <div className="p-4 md:p-6 grid lg:grid-cols-2 gap-4">
@@ -105,26 +82,57 @@ const CreateFund = () => {
                 <Badge>{selectedTokens.length}</Badge>
               )}
             </CardTitle>
-            <div className="divide-y px-1 mb-4 max-h-[80svh] overflow-y-auto">
-              {selectedTokens.map((token) => (
-                <div
-                  key={token.address}
-                  className="flex items-center justify-between w-full gap-2 py-4"
-                >
-                  <div className="flex justify-between items-center gap-2">
-                    <img
-                      src={`${token.icon}`}
-                      alt={token.name}
-                      className="size-10 rounded-full border"
-                    />
-                    <span className="font-medium">{token.name}</span>
-                  </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <div className="border p-2 rounded-lg min-w-20">
-                      <span>{(100 / selectedTokens.length).toFixed(2)}</span>
-                      <span>%</span>
+          </CardHeader>
+          {tokens && tokens.length > 0 && (
+            <>
+              <div className="divide-y pt-0 mb-4 p-4 md:p-6 max-h-[80svh] overflow-y-auto">
+                {selectedTokens.map((token) => (
+                  <div
+                    key={token.issuer}
+                    className="flex items-center justify-between w-full gap-2 py-4"
+                  >
+                    <div className="flex justify-between items-center gap-2">
+                      <img
+                        src={`${token.gravatar}`}
+                        alt={token.code}
+                        className="size-10 rounded-full border"
+                      />
+                      <span className="font-medium">{token.code}</span>
                     </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="border p-2 rounded-lg min-w-20">
+                        <span>{(100 / selectedTokens.length).toFixed(2)}</span>
+                        <span>%</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (selectedTokens.includes(token)) {
+                            setSelectedTokens(
+                              selectedTokens.filter((t) => t !== token)
+                            );
+                          } else {
+                            setSelectedTokens([...selectedTokens, token]);
+                          }
+                        }}
+                        className="text-lg hover:text-destructive"
+                      >
+                        <LucideXCircle />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Input
+                type="text"
+                placeholder="Search by name"
+                className="pl-10 m-4 w-48 bg-primary/5 rounded-full text-sm"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <CardContent className="md:pt-0">
+                <div className="divide-y px-1 max-h-[80svh] overflow-y-auto">
+                  {filteredTokens.map((token) => (
                     <button
+                      key={token.id}
                       onClick={() => {
                         if (selectedTokens.includes(token)) {
                           setSelectedTokens(
@@ -134,50 +142,25 @@ const CreateFund = () => {
                           setSelectedTokens([...selectedTokens, token]);
                         }
                       }}
-                      className="text-lg hover:text-destructive"
+                      className="flex items-center justify-between w-full gap-2 py-4"
                     >
-                      <LucideXCircle />
+                      <div className="flex justify-between items-center gap-2">
+                        <img
+                          src={`${token.gravatar}`}
+                          alt={token.title}
+                          className="size-10 rounded-full border"
+                        />
+                        <span className="font-medium">{token.code}</span>
+                      </div>
+                      <span className="text-sm max-w-40 truncate">
+                        {token.issuer}
+                      </span>
                     </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <Input
-              type="text"
-              placeholder="Search by name"
-              className="pl-10 w-48 bg-primary/5 rounded-full text-sm"
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </CardHeader>
-          <CardContent className="md:pt-0">
-            <div className="divide-y px-1 max-h-[80svh] overflow-y-auto">
-              {filteredTokens.map((token) => (
-                <button
-                  key={token.address}
-                  onClick={() => {
-                    if (selectedTokens.includes(token)) {
-                      setSelectedTokens(
-                        selectedTokens.filter((t) => t !== token)
-                      );
-                    } else {
-                      setSelectedTokens([...selectedTokens, token]);
-                    }
-                  }}
-                  className="flex items-center justify-between w-full gap-2 py-4"
-                >
-                  <div className="flex justify-between items-center gap-2">
-                    <img
-                      src={`${token.icon}`}
-                      alt={token.name}
-                      className="size-10 rounded-full border"
-                    />
-                    <span className="font-medium">{token.name}</span>
-                  </div>
-                  <span className="text-sm ">{token.address}</span>
-                </button>
-              ))}
-            </div>
-          </CardContent>
+              </CardContent>
+            </>
+          )}
         </Card>
         <div className="lg:col-span-full flex items-center justify-end gap-2">
           <Button
